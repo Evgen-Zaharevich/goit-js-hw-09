@@ -1,8 +1,5 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-// Notify.success('Sol lucet omnibus');
-// Notify.failure('Qui timide rogat docet negare');
-
 const getRef = selector => document.querySelector(selector);
 getRef(`form`).addEventListener(`submit`, onClickSubmit);
 
@@ -20,8 +17,12 @@ function onClickSubmit(e) {
     const counter = i + 1;
 
     createPromise(counter, delayValue)
-      .then(message => Notify.success(message))
-      .catch(error => Notify.failure(error));
+      .then(({ position, delay }) =>
+        Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`)
+      )
+      .catch(({ position, delay }) =>
+        Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`)
+      );
     delayValue += stepValue;
   }
 }
@@ -32,9 +33,9 @@ function createPromise(position, delay) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (shouldResolve) {
-        resolve(`✅ Fulfilled promise ${position} in ${delay}ms`);
+        resolve({ position, delay });
       } else {
-        reject(`❌ Rejected promise ${position} in ${delay}ms`);
+        reject({ position, delay });
       }
     }, delay);
   });

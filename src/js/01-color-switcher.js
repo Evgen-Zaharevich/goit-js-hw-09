@@ -1,27 +1,34 @@
-const getRef = selector => document.querySelector(selector);
+const startButtonRef = document.querySelector(`[data-start]`);
+const stopButtonRef = document.querySelector(`[data-stop]`);
+const bodyRef = document.body;
 
 let intervalId = null;
 
-getRef(`[data-start]`).addEventListener(
-  `click`,
-  onChangeColorOnClickStartButton
-);
-getRef(`[data-stop`).addEventListener(`click`, onStopChangeColor);
+startButtonRef.addEventListener(`click`, onChangeColorOnClickStartButton);
+stopButtonRef.addEventListener(`click`, onStopChangeColor);
 
 function onChangeColorOnClickStartButton() {
   intervalId = setInterval(() => {
-    getRef(`body`).style.backgroundColor = getRandomHexColor();
+    bodyRef.style.backgroundColor = getRandomHexColor();
   }, 1000);
 
-  getRef(`[data-start]`).setAttribute(`disabled`, true);
-  getRef(`[data-stop]`).removeAttribute(`disabled`);
+  addAttributeDisabled(startButtonRef);
+  removeAttributeDisabled(stopButtonRef);
 }
 
 function onStopChangeColor() {
   clearInterval(intervalId);
 
-  getRef(`[data-start]`).removeAttribute(`disabled`);
-  getRef(`[data-stop]`).setAttribute(`disabled`, true);
+  removeAttributeDisabled(startButtonRef);
+  addAttributeDisabled(stopButtonRef);
+}
+
+function addAttributeDisabled(element) {
+  element.setAttribute(`disabled`, true);
+}
+
+function removeAttributeDisabled(element) {
+  element.removeAttribute(`disabled`);
 }
 
 function getRandomHexColor() {

@@ -2,15 +2,21 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-let getRef = selector => document.querySelector(selector);
+const dateTimePicker = document.querySelector(`#datetime-picker`);
+const startButtonRef = document.querySelector(`[data-start]`);
+const stopButtonRef = document.querySelector(`[data-stop]`);
+const daysRef = document.querySelector(`[data-days]`);
+const hoursRef = document.querySelector(`[data-hours]`);
+const minutesRef = document.querySelector(`[data-minutes]`);
+const secondsRef = document.querySelector(`[data-seconds]`);
 
 let userDate = null;
 let intervalId = null;
 
-getRef(`[data-start]`).setAttribute(`disabled`, true);
-getRef(`[data-stop]`).setAttribute(`disabled`, true);
-getRef(`[data-start]`).addEventListener(`click`, onStartCountdown);
-getRef(`[data-stop]`).addEventListener(`click`, onStopCountdown);
+addAttributeDisabled(startButtonRef);
+addAttributeDisabled(stopButtonRef);
+startButtonRef.addEventListener(`click`, onStartCountdown);
+stopButtonRef.addEventListener(`click`, onStopCountdown);
 
 const options = {
   enableTime: true,
@@ -25,23 +31,23 @@ const options = {
       Notify.failure('Please choose a date in the future', {
         position: 'center-top',
       });
-      getRef(`[data-start]`).setAttribute(`disabled`, true);
+      addAttributeDisabled(startButtonRef);
       return;
     }
-    getRef(`[data-start]`).removeAttribute(`disabled`);
+    remoteAttributeDisabled(startButtonRef);
   },
 };
 
-flatpickr(getRef(`#datetime-picker`), options);
+flatpickr(dateTimePicker, options);
 
 function onStartCountdown() {
   intervalId = setInterval(() => {
     updateDate();
   }, 1000);
 
-  getRef(`[data-start]`).setAttribute(`disabled`, true);
-  getRef(`#datetime-picker`).setAttribute(`disabled`, true);
-  getRef(`[data-stop]`).removeAttribute(`disabled`);
+  addAttributeDisabled(startButtonRef);
+  addAttributeDisabled(dateTimePicker);
+  remoteAttributeDisabled(stopButtonRef);
 
   Notify.success('Countdown has started', {
     position: 'center-top',
@@ -54,19 +60,23 @@ function updateDate() {
   if (deltaTime < 0) {
     return;
   }
+  setValueOnTimer(deltaTime);
+}
+
+function setValueOnTimer(deltaTime) {
   const { days, hours, minutes, seconds } = convertMs(deltaTime);
-  getRef(`[data-days]`).textContent = `${days}`;
-  getRef(`[data-hours]`).textContent = `${hours}`;
-  getRef(`[data-minutes]`).textContent = `${minutes}`;
-  getRef(`[data-seconds]`).textContent = `${seconds}`;
+  daysRef.textContent = `${days}`;
+  hoursRef.textContent = `${hours}`;
+  minutesRef.textContent = `${minutes}`;
+  secondsRef.textContent = `${seconds}`;
 }
 
 function onStopCountdown() {
   clearInterval(intervalId);
 
-  getRef(`[data-start]`).removeAttribute(`disabled`);
-  getRef(`#datetime-picker`).removeAttribute(`disabled`);
-  getRef(`[data-stop]`).setAttribute(`disabled`, true);
+  remoteAttributeDisabled(startButtonRef);
+  remoteAttributeDisabled(dateTimePicker);
+  addAttributeDisabled(stopButtonRef);
 
   Notify.warning('Countdown stopped', {
     position: 'center-top',
@@ -75,6 +85,14 @@ function onStopCountdown() {
 
 function pad(value) {
   return String(value).padStart(2, `0`);
+}
+
+function addAttributeDisabled(element) {
+  element.setAttribute(`disabled`, true);
+}
+
+function remoteAttributeDisabled(element) {
+  element.removeAttribute(`disabled`);
 }
 
 function convertMs(ms) {
